@@ -6,6 +6,7 @@ import (
 )
 
 type endPoint struct {
+	tls     bool
 	service string
 	region  string
 	stage   string
@@ -21,6 +22,10 @@ func EndPointBuilder() *endPointBuilder {
 	return &endPointBuilder{
 		endPoint: endPoint{},
 	}
+}
+func (builder *endPointBuilder) SetTls() *endPointBuilder {
+	builder.endPoint.tls = true
+	return builder
 }
 
 func (builder *endPointBuilder) SetService(service string) *endPointBuilder {
@@ -50,10 +55,15 @@ func (builder *endPointBuilder) SetTld(tld string) *endPointBuilder {
 
 func (builder *endPointBuilder) Build() string {
 	var endpoint strings.Builder
+	if builder.endPoint.tls {
+		endpoint.WriteString("https://")
+	} else {
+		endpoint.WriteString("http://")
+	}
 	if builder.endPoint.service == "" {
 		panic("service name is required")
 	} else {
-		endpoint.WriteString(fmt.Sprintf("https://%s", builder.endPoint.service))
+		endpoint.WriteString(builder.endPoint.service)
 	}
 	if builder.endPoint.region != "" {
 		endpoint.WriteString(fmt.Sprintf("-%s", builder.endPoint.region))
